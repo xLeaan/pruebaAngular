@@ -1,0 +1,195 @@
+<p-card header="Contactos">
+    <p-toast></p-toast>
+    <p-toolbar styleClass="mb-4 gap-2">
+        <ng-template pTemplate="left">
+            <p-button 
+                severity="success" 
+                label="Nueva" 
+                icon="pi pi-plus" 
+                class="mr-2" 
+                (onClick)="openNew()" />
+            
+            <p-button 
+                severity="danger" 
+                label="Eliminar" 
+                icon="pi pi-trash" 
+                badge="{{ selectedContactos.length }}" 
+                [disabled]="selectedContactos.length === 0"
+                (onClick)="deleteSelected()"
+            />
+        </ng-template>
+        <ng-template pTemplate="right"></ng-template>
+    </p-toolbar>
+
+    <p-dialog [(visible)]="modalVisible" header="Contacto" [modal]="true" [closable]="true" [style]="{width: '40vw'}" class="custom-modal">
+        <form [formGroup]="contactoForm">
+            <div class="p-fluid p-grid">
+                <div class="p-field p-col-12">
+                    <label for="nombre">Nombre</label>
+                    <input id="nombre" type="text" pInputText formControlName="nombre" />
+                    <small class="p-error" *ngIf="contactoForm.get('nombre')?.invalid && contactoForm.get('nombre')?.touched">
+                        * El nombre es obligatorio y debe tener máximo 255 caracteres.
+                    </small>
+                </div>
+                <div class="p-field p-col-12">
+                    <label for="entidad_id">Entidad</label>
+                    <p-dropdown 
+                        id="entidad_id" 
+                        formControlName="entidad_id" 
+                        [options]="entidades" 
+                        optionLabel="nombre" 
+                        optionValue="id"
+                        placeholder="Selecciona una entidad" />
+                    <small class="p-error" *ngIf="contactoForm.get('entidad')?.invalid && contactoForm.get('entidad')?.touched">
+                        * Este campo es obligatorio.
+                    </small>
+                </div>
+                
+                <div class="p-field p-col-12">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" pInputText formControlName="email" />
+                    <small class="p-error" *ngIf="contactoForm.get('email')?.invalid && contactoForm.get('email')?.touched">
+                        * Ingresa un email válido (ejemplo&#64;correo.com).
+                    </small>
+                </div>
+                <div class="p-field p-col-6">
+                    <label for="telefono">Teléfono</label>
+                    <input id="telefono" type="text" pInputText formControlName="telefono" />
+                    <small class="p-error" *ngIf="contactoForm.get('telefono')?.invalid && contactoForm.get('telefono')?.touched">
+                        * El teléfono debe tener máximo 15 caracteres.
+                    </small>
+                </div>
+                <div class="p-field p-col-12">
+                    <label for="direccion">Dirección</label>
+                    <input id="direccion" type="text" pInputText formControlName="direccion" />
+                    <small class="p-error" *ngIf="contactoForm.get('direccion')?.invalid && contactoForm.get('direccion')?.touched">
+                        * La dirección debe tener máximo 255 caracteres.
+                    </small>
+                </div>
+                <div class="p-field p-col-12">
+                    <label for="notas">Notas</label>
+                    <input id="notas" type="text" pInputText formControlName="notas" />
+                    <small class="p-error" *ngIf="contactoForm.get('direccion')?.invalid && contactoForm.get('direccion')?.touched">
+                        * La dirección debe tener máximo 255 caracteres.
+                    </small>
+                </div>
+                <div class="p-field p-col-6">
+                    <label for="fecha_nacimiento">Fecha de nacimiento</label>
+                    <input id="fecha_nacimiento" type="date" pInputText formControlName="fecha_nacimiento" />
+                </div>
+                <div class="p-field p-col-6">
+                    <label for="identificacion">Identificación</label>
+                    <input id="identificacion" type="text" pInputText formControlName="identificacion" />
+                </div>
+                
+            </div>
+        </form>
+        <p-footer class="modal-footer">
+            <p-button label="Guardar" icon="pi pi-check" (onClick)="saveContacto()" [disabled]="contactoForm.invalid" class="p-button-success"></p-button>
+            <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (onClick)="modalVisible = false"></p-button>
+        </p-footer>
+    </p-dialog>
+    
+    
+
+    <p-table
+        #dt
+        [value]="contactos"
+        [rows]="10"
+        [paginator]="true"
+        [globalFilterFields]="['nombre', 'email', 'telefono', 'direccion', 'notas', 'Identificacion']"
+        [tableStyle]="{ 'min-width': '75rem' }"
+        [rowHover]="true"
+        dataKey="id"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} entradas"
+        [showCurrentPageReport]="true"
+        [loading]="loading"
+        [(selection)]="selectedContactos"
+    >
+        <ng-template pTemplate="caption">
+            <div class="flex align-items-center justify-content-between">
+                <h5 class="m-0">Lista de contactos</h5>
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search"></i>
+                    <input 
+                        pInputText 
+                        type="text" 
+                        class="fietext-base text-color surface-overlay p-2 border-1 border-solid surface-border border-round appearance-none outline-none focus:border-primary w-fullld"
+                        placeholder="Buscar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="width: 4rem">
+                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                </th>
+                <th pSortableColumn="nombre" style="min-width:15rem">
+                    Nombre <p-sortIcon field="nombre"></p-sortIcon>
+                </th>
+                <th pSortableColumn="email" style="min-width:10rem">
+                    Email <p-sortIcon field="email"></p-sortIcon>
+                </th>
+                <th pSortableColumn="telefono">
+                    Teléfono <p-sortIcon field="telefono"></p-sortIcon>
+                </th>
+                <th pSortableColumn="direccion">
+                    Dirección <p-sortIcon field="direccion"></p-sortIcon>
+                </th>
+                <th pSortableColumn="notas">
+                    Notas <p-sortIcon field="notas"></p-sortIcon>
+                </th>
+                <th pSortableColumn="fecha_nacimiento">
+                    Fecha Nacimiento <p-sortIcon field="fecha_nacimiento"></p-sortIcon>
+                </th>
+                <th pSortableColumn="info">
+                    Creado por <p-sortIcon field="info"></p-sortIcon>
+                </th>   
+                <th pSortableColumn="identificacion">
+                    Identificación<p-sortIcon field="identificacion"></p-sortIcon>
+                </th>  
+                <th>Opciones</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-contacto>
+            <tr>
+                <td>
+                    <p-tableCheckbox [value]="contacto"></p-tableCheckbox>
+                </td>
+                <td>{{ contacto.nombre }}</td>
+                <td>{{ contacto.email }}</td>
+                <td>{{ contacto.telefono }}</td>
+                <td>{{ contacto.direccion }}</td>
+                <td>{{ contacto.notas }}</td>
+                <td>{{ contacto.fecha_nacimiento }}</td>
+                <td>{{ contacto.creado_por }}</td>
+                <td>{{ contacto.identificacion }}</td>
+                
+                <td>
+                    <p-button 
+                        icon="pi pi-pencil" 
+                        class="mr-2" 
+                        [rounded]="true" 
+                        [outlined]="true" 
+                        severity="success" 
+                        (onClick)="edit(contacto)" />
+                    <p-button 
+                        icon="pi pi-trash" 
+                        class="mr-2" 
+                        severity="danger" 
+                        [rounded]="true" 
+                        [outlined]="true" 
+                        (onClick)="delete(contacto)" />
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="summary">
+            <div class="flex align-items-center justify-content-between">
+                Total {{ total() }} contactos.
+            </div>
+        </ng-template>
+        
+
+    </p-table>
+</p-card>
+<p-confirmDialog></p-confirmDialog>
